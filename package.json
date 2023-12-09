@@ -1,0 +1,32 @@
+{
+  "name": "fullstack_open_part_3",
+  "version": "1.0.0",
+  "description": "coursework for helsinki's full stack open course, part 3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gros-pataplouf/fullstack_open_part_3.git"
+  },
+  "keywords": [
+    "node",
+    "express"
+  ],
+  "author": "Cornelia Petry",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gros-pataplouf/fullstack_open_part_3/issues"
+  },
+  "homepage": "https://github.com/gros-pataplouf/fullstack_open_part_3#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
