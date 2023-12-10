@@ -1,7 +1,2 @@
-POST http://localhost:3001/api/persons
-content-type: application/json
+GET https://fullstackopenpart3-production.up.railway.app/api
 
-{
-    "name": "Yoyo Ma",
-    "number": "234-2345743"
-}

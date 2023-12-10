@@ -13,6 +13,7 @@ morgan.token("reqbody", function (req, res) {
 });
 
 app.use(cors());
+app.use(express.static("./dist"));
 app.use(morgan(":method :url :status - :response-time ms :reqbody"));
 app.use(express.json());
 
