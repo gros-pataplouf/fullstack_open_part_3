@@ -16,6 +16,11 @@ app.use(cors());
 app.use(morgan(":method :url :status - :response-time ms :reqbody"));
 app.use(express.json());
 
+
+app.get("/", (req, res) => {
+    res.send("Welcome to the phonebook api")
+}) 
+
 app.get("/info", (req, res) => {
   const numOfPeople = data.length;
   return res.send(
