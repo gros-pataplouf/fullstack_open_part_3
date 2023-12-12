@@ -13,7 +13,10 @@ const App = () => {
   const [searchFailed, setSearchFailed] = useState(false);
   const [message, setMessage] = useState({ type: null, text: "" });
   useEffect(() => {
-    personsService.getAll().then((response) => setPersons(response.data));
+    personsService
+      .getAll()
+      .then((response) => response.length && setPersons(response.data))
+      .catch((error) => console.error(error));
   }, []);
 
   return (
@@ -35,15 +38,19 @@ const App = () => {
         }}
       />
       <h2>Numbers</h2>
-      <Phonebook
-        props={{
-          persons,
-          filteredPersons,
-          searchFailed,
-          setPersons,
-          setMessage,
-        }}
-      />
+      {persons.length ? (
+        <Phonebook
+          props={{
+            persons,
+            filteredPersons,
+            searchFailed,
+            setPersons,
+            setMessage,
+          }}
+        />
+      ) : (
+        <p>Phonebook empty</p>
+      )}{" "}
     </div>
   );
 };

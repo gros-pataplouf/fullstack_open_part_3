@@ -1,9 +1,17 @@
 const express = require("express");
-const app = express();
-const PORT = 3001;
 const morgan = require("morgan");
 const cors = require("cors");
-let data = require("./data.json");
+require("dotenv").config();
+const Person = require("./models/person");
+const {
+  Error400,
+  Error403,
+  Error404,
+  Error500,
+  errorHandler,
+} = require("./errorHandling");
+const app = express();
+const PORT = process.env.PORT;
 
 morgan.token("reqbody", function (req, res) {
   if (req.method === "POST") {
@@ -14,59 +22,76 @@ morgan.token("reqbody", function (req, res) {
 
 app.use(cors());
 app.use(express.static("./dist"));
-app.use(morgan(":method :url :status - :response-time ms :reqbody"));
 app.use(express.json());
+app.use(morgan(":method :url :status - :response-time ms :reqbody"));
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the phonebook api");
+app.get("/info", (req, res, next) => {
+  Person.find({})
+    .then((response) => {
+      res.send(
+        `<p>Phonebook has info for ${
+          response.length
+        } people</p> <p>${new Date().toLocaleString()} ${new Date().toString()}) `,
+      );
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
-app.get("/info", (req, res) => {
-  const numOfPeople = data.length;
-  return res.send(
-    `<p>Phonebook has info for ${numOfPeople} people</p> <p>${new Date().toLocaleString()} ${new Date().toString()} `,
-  );
+app.get("/api/persons", (req, res, next) => {
+  Person.find({})
+    .then((response) => {
+      return res.json(response);
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
-app.get("/api/persons", (req, res) => {
-  return res.json(data);
+app.get("/api/persons/:id", (req, res, next) => {
+  const id = req.params.id;
+  const person = Person.findById(req.params.id)
+    .then((person) => {
+      if (!person) {
+        throw new Error404();
+      }
+      return res.json(person);
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const person = data.find((person) => person.id === id);
-  if (person) {
-    return res.json(person);
-  } else
-    return res.status(404).send(`Sorry, there is no id ${id} in our database.`);
-});
-
-app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const person = data.find((person) => person.id === id);
-  if (person) {
-    data = data.filter((person) => person.id !== id);
-    console.log(data);
-    return res.status(204).send({ message: `${id} has been deleted.` });
-  } else
-    return res.status(404).send(`Sorry, there is no id ${id} in our database.`);
+app.delete("/api/persons/:id", (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then((response) => {
+      if (response) {
+        return res.status(204).end();
+      } else {
+        throw new Error404();
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
 });
 
 app.post("/api/persons", (req, res) => {
-  const newPerson = req.body;
-  if (!newPerson.name || !newPerson.number) {
-    return res.status(400).send({ error: "name or number missing" });
+  if (!req.body.name || !req.body.number) {
+    throw new Error400();
   }
-  if (data.find((person) => person.name === newPerson.name)) {
-    return res
-      .status(403)
-      .send({ error: "duplicate values are not authorized" });
-  }
-  const id = Math.floor(Math.random() * 1000000000000);
-  const validatedPerson = { id, ...newPerson }; //otherwise, morgan logs the created id, despite it not being present in the original request body
-  data.push(validatedPerson);
-  return res.status(201).send("newPerson created");
+  const newPerson = new Person({
+    name: req.body.name,
+    number: req.body.number,
+  });
+  newPerson
+    .save()
+    .then((savedPerson) => {
+      res.status(201).json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}.`);

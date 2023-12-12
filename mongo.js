@@ -16,6 +16,7 @@ const personSchema = new mongoose.Schema({
 });
 
 const Person = mongoose.model("Person", personSchema);
+console.log(Person);
 
 if (process.argv.length === 3) {
   console.log("phonebook");
