@@ -35,6 +35,44 @@ const Form = ({ props }) => {
     const [existingPerson, ...rest] = await personsService.getByName(
       newName.trim(),
     );
+    if (existingPerson) {
+      setMessage({
+        type: "warning",
+        text: `${newPerson.name} is already in the phonebook, updating`,
+      });
+      setTimeout(() => {
+        setMessage({ type: null, text: "" });
+      }, 2000);
+      return personsService.update(existingPerson.id, newPerson)
+      .then((response) => {
+        console.log(response);
+        setMessage({
+          type: "success",
+          text: `${existingPerson.name} has been updated!`,
+        });
+        setTimeout(() => {
+          setMessage({ type: null, text: "" });
+        }, 2000);
+        personsService.getAll()
+        .then(response => {
+          setPersons(response.data);          
+        })
+        .catch(error => {
+          console.error(error)
+        })
+      })
+      .catch((error) => {
+        console.error(error);
+        setMessage({
+          type: "warning",
+          text: `There has been a problem updating ${existingPerson.name}: ${error.response.data.error} `,
+        });
+        setTimeout(() => {
+          setMessage({ type: null, text: "" });
+        }, 2000);
+      });
+    }
+
     personsService
       .create(newPerson)
       .then((response) => {
